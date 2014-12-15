@@ -35,7 +35,7 @@ int __init sec_avc_log_init(void)
 #ifdef CONFIG_SEC_DEBUG
 	if (kernel_sec_get_debug_level() == KERNEL_SEC_DEBUG_LEVEL_LOW) {
 		pr_info("AVC_MSG:debug level is low.\n");
-		return 1;
+//		return 1;
 	}
 #endif
 
@@ -57,7 +57,7 @@ int __init sec_avc_log_init(void)
 	return 1;
 }
 
-#define BUF_SIZE 256
+#define BUF_SIZE 512
 void sec_avc_log(char *fmt, ...)
 {
 	va_list args;

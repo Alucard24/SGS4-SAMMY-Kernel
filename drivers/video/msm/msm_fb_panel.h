@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2013, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -184,6 +184,8 @@ struct msm_panel_info {
 	struct lcdc_panel_info lcdc;
 	struct mipi_panel_info mipi;
 	struct lvds_panel_info lvds;
+	__u32 xres_aligned;
+	__u32 yres_aligned;
 };
 
 #define MSM_FB_SINGLE_MODE_PANEL(pinfo)		\
@@ -204,9 +206,12 @@ struct msm_fb_panel_data {
 	int (*on) (struct platform_device *pdev);
 	int (*off) (struct platform_device *pdev);
 	int (*late_init) (struct platform_device *pdev);
+	int (*early_off) (struct platform_device *pdev);
 	int (*power_ctrl) (boolean enable);
 	struct platform_device *next;
 	int (*clk_func) (int enable);
+	int (*fps_level_change) (struct platform_device *pdev,
+					u32 fps_level);
 };
 
 /*===========================================================================
@@ -217,7 +222,10 @@ struct platform_device *msm_fb_device_alloc(struct msm_fb_panel_data *pdata,
 int panel_next_on(struct platform_device *pdev);
 int panel_next_init(struct platform_device *pdev);
 int panel_next_off(struct platform_device *pdev);
+int panel_next_fps_level_change(struct platform_device *pdev,
+					u32 fps_level);
 int panel_next_late_init(struct platform_device *pdev);
+int panel_next_early_off(struct platform_device *pdev);
 
 int lcdc_device_register(struct msm_panel_info *pinfo);
 

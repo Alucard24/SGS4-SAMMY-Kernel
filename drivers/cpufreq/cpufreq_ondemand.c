@@ -138,7 +138,7 @@ static inline void dbs_timer_exit(struct cpu_dbs_info_s *dbs_info);
 static unsigned int dbs_enable;	/* number of CPUs using this policy */
 
 /*
- * dbs_mutex protects dbs_enable in governor start/stop.
+ * dbs_mutex protects dbs_enable and dbs_info during start/stop.
  */
 static DEFINE_MUTEX(dbs_mutex);
 
@@ -854,6 +854,8 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 
 	this_dbs_info->freq_lo = 0;
 	policy = this_dbs_info->cur_policy;
+	if(policy == NULL)
+		return;
 
 	/*
 	 * Every sampling_rate, we check, if current idle time is less
@@ -928,6 +930,8 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 		j_dbs_info->max_load  = max(cur_load, j_dbs_info->prev_load);
 		j_dbs_info->prev_load = cur_load;
 		freq_avg = __cpufreq_driver_getavg(policy, j);
+		if (policy == NULL)
+			return;
 		if (freq_avg <= 0)
 			freq_avg = policy->cur;
 

@@ -832,8 +832,13 @@ xt_replace_table(struct xt_table *table,
 		return NULL;
 	}
 
-	table->private = newinfo;
 	newinfo->initial_entries = private->initial_entries;
+	/*
+	 * Ensure contents of newinfo are visible before assigning to
+	 * private.
+	 */
+	smp_wmb();
+	table->private = newinfo;
 
 	/*
 	 * Even though table entries have now been swapped, other CPU's
@@ -844,7 +849,7 @@ xt_replace_table(struct xt_table *table,
 	local_bh_enable();
 
 #ifdef CONFIG_AUDIT
-	if (audit_enabled) {
+/*	if (audit_enabled) {
 		struct audit_buffer *ab;
 
 		ab = audit_log_start(current->audit_context, GFP_KERNEL,
@@ -855,7 +860,7 @@ xt_replace_table(struct xt_table *table,
 					 private->number);
 			audit_log_end(ab);
 		}
-	}
+	}*/
 #endif
 
 	return private;

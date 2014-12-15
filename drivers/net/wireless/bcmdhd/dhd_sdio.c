@@ -2,13 +2,13 @@
  * DHD Bus Module for SDIO
  *
  * Copyright (C) 1999-2013, Broadcom Corporation
- *
+ * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
  * under the terms of the GNU General Public License version 2 (the "GPL"),
  * available at http://www.broadcom.com/licenses/GPLv2.php, with the
  * following added to such license:
- *
+ * 
  *      As a special exception, the copyright holders of this software give you
  * permission to link this software with independent modules, and to copy and
  * distribute the resulting executable under terms of your choice, provided that
@@ -16,7 +16,7 @@
  * the license of that module.  An independent module is a module which is not
  * derived from this software.  The special exception does not apply to any
  * modifications of the software.
- *
+ * 
  *      Notwithstanding the above, under no circumstances may you combine this
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
@@ -174,7 +174,7 @@ extern int dhd_os_wlfc_unblock(dhd_pub_t *pub);
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 DEFINE_MUTEX(_dhd_sdio_mutex_lock_);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) */
-#endif
+#endif 
 
 #ifdef DHD_DEBUG
 /* Device console log buffer state */
@@ -272,7 +272,7 @@ typedef struct dhd_bus {
 	bool		poll;			/* Use polling */
 	bool		ipend;			/* Device interrupt is pending */
 	bool		intdis;			/* Interrupts disabled by isr */
-	uint		intrcount;		/* Count of device interrupt callbacks */
+	uint 		intrcount;		/* Count of device interrupt callbacks */
 	uint		lastintrs;		/* Count as of last watchdog timer */
 	uint		spurious;		/* Count of spurious interrupts */
 	uint		pollrate;		/* Ticks between device polls */
@@ -576,7 +576,7 @@ do {												\
 												\
 	R_SDREG(intstatuserr, &bus->regs->intstatus, retries);					\
 	printf("dstatussw = 0x%x, dstatushw = 0x%x, intstatus = 0x%x\n",			\
-	        dstatussw, dstatushw, intstatuserr);						\
+	        dstatussw, dstatushw, intstatuserr); 						\
 												\
 	bus->nextlen = 0;									\
 	*finished = TRUE;									\
@@ -584,7 +584,7 @@ do {												\
 
 #else /* BCMSDIO */
 
-#define FRAME_AVAIL_MASK(bus)	\
+#define FRAME_AVAIL_MASK(bus) 	\
 	((bus->rxint_mode == SDIO_DEVICE_HMB_RXINT) ? I_HMB_FRAME_IND : I_XMTDATA_AVAIL)
 
 #define DHD_BUS			SDIO_BUS
@@ -1710,7 +1710,7 @@ dhd_tcpack_suppress(dhd_pub_t *dhdp, void *pkt)
 #if defined(DHD_DEBUG)
 		uint32 tcp_seq_num = tcp_header[4] << 24 | tcp_header[5] << 16 |
 			tcp_header[6] << 8 | tcp_header[7];
-#endif
+#endif 
 		uint32 tcp_ack_num = tcp_header[8] << 24 | tcp_header[9] << 16 |
 			tcp_header[10] << 8 | tcp_header[11];
 		uint16 ip_tcp_ttllen =  (ip_header[3] & 0xff) + (ip_header[2] << 8);
@@ -3613,7 +3613,7 @@ dhd_serialconsole(dhd_bus_t *bus, bool set, bool enable, int *bcmerror)
 
 	return (int_val & uart_enab);
 }
-#endif
+#endif 
 
 static int
 dhdsdio_doiovar(dhd_bus_t *bus, const bcm_iovar_t *vi, uint32 actionid, const char *name,
@@ -6677,7 +6677,7 @@ dhdsdio_isr(void *arg)
 	bus->dpc_sched = TRUE;
 	dhd_sched_dpc(bus->dhd);
 
-#endif
+#endif 
 
 }
 
@@ -7282,7 +7282,7 @@ dhdsdio_probe(uint16 venid, uint16 devid, uint16 bus_no, uint16 slot,
 	}
 	mutex_lock(&_dhd_sdio_mutex_lock_);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) */
-#endif
+#endif 
 
 	/* Init global variables at run-time, not as part of the declaration.
 	 * This is required to support init/de-init of the driver. Initialization
@@ -7433,7 +7433,7 @@ dhdsdio_probe(uint16 venid, uint16 devid, uint16 bus_no, uint16 slot,
 	DHD_INFO(("%s: completed!!\n", __FUNCTION__));
 
 #ifdef GET_CUSTOM_MAC_ENABLE
-	/* Read MAC address from external customer place	*/
+	/* Read MAC address from external customer place 	*/
 	memset(&ea_addr, 0, sizeof(ea_addr));
 	ret = dhd_custom_get_mac_address(ea_addr.octet);
 	if (!ret) {
@@ -7475,7 +7475,7 @@ dhdsdio_probe(uint16 venid, uint16 devid, uint16 bus_no, uint16 slot,
 	mutex_unlock(&_dhd_sdio_mutex_lock_);
 	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) */
-#endif
+#endif 
 
 	return bus;
 
@@ -7488,7 +7488,7 @@ forcereturn:
 	mutex_unlock(&_dhd_sdio_mutex_lock_);
 	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) */
-#endif
+#endif 
 
 	return NULL;
 }
@@ -8001,7 +8001,7 @@ dhdsdio_disconnect(void *ptr)
 	}
 	mutex_lock(&_dhd_sdio_mutex_lock_);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) */
-#endif
+#endif 
 
 
 	if (bus) {
@@ -8529,7 +8529,7 @@ dhd_bus_devreset(dhd_pub_t *dhdp, uint8 flag)
 #if !defined(IGNORE_ETH0_DOWN)
 						/* Restore flow control  */
 						dhd_txflowcontrol(bus->dhd, ALL_INTERFACES, OFF);
-#endif
+#endif 
 						dhd_os_wd_timer(dhdp, dhd_watchdog_ms);
 
 						DHD_TRACE(("%s: WLAN ON DONE\n", __FUNCTION__));
