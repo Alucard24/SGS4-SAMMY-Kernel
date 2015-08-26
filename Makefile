@@ -192,8 +192,9 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
-ARCH		?= arm
-CROSS_COMPILE	?= /opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
+ARCH		?=arm
+CROSS_COMPILE	?=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
+
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -345,10 +346,14 @@ KALLSYMS	= scripts/kallsyms
 PERL		= perl
 CHECK		= sparse
 
+ifeq ($(CONFIG_CRYPTO_FIPS),)
+ READELF	= $(CROSS_COMPILE)readelf
+ export READELF
+endif
+
 # Use the wrapper for the compiler.  This wrapper scans for new
 # warnings and causes the build to stop upon encountering them.
 CC		= $(srctree)/scripts/gcc-wrapper.py $(REAL_CC)
-# CC		= $(REAL_CC)
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
@@ -373,9 +378,9 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks \
-                   -Wno-sizeof-pointer-memaccess \
-                   -Wno-aggressive-loop-optimizations
+		   -Wno-sizeof-pointer-memaccess \
+		   -Wno-aggressive-loop-optimizations \
+		   -fno-delete-null-pointer-checks
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
@@ -647,6 +652,26 @@ ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-goto.sh $(CC)), y)
 	KBUILD_CFLAGS += -DCC_HAVE_ASM_GOTO
 endif
 
+#Disable the whole of the following block to disable L1 TIMA
+#ifeq ($(TIMA_ENABLED),1)
+#      KBUILD_CFLAGS += 	-DTIMA_ENABLED \
+			-DTIMA_PGD_FREE_MANAGE -DTIMA_COPY_PMD_MANAGE \
+			-DTIMA_PMD_CLEAR_MANAGE -DTIMA_KERNEL_L1_MANAGE \
+			-DTIMA_L2_MANAGE -DTIMA_L2_GROUP \
+			-DTIMA_DEBUG_INFRA -DTIMA_INIT_SEC_MON
+#       KBUILD_AFLAGS += -DTIMA_ENABLED \
+			-DTIMA_PGD_FREE_MANAGE -DTIMA_COPY_PMD_MANAGE \
+			-DTIMA_PMD_CLEAR_MANAGE -DTIMA_KERNEL_L1_MANAGE \
+			-DTIMA_L2_MANAGE -DTIMA_L2_GROUP \
+			-DTIMA_DEBUG_INFRA -DTIMA_INIT_SEC_MON
+#endif
+
+#Disable the whole of the following block to disable LKM AUTH
+ifeq ($(TIMA_ENABLED),1)
+       KBUILD_CFLAGS += -DTIMA_LKM_AUTH_ENABLED -DTIMA_TEST_INFRA #-DTIMA_LKM_SET_PAGE_ATTRIB
+       KBUILD_AFLAGS += -DTIMA_LKM_AUTH_ENABLED #-DTIMA_LKM_SET_PAGE_ATTRIB
+endif
+
 # Add user supplied CPPFLAGS, AFLAGS and CFLAGS as the last assignments
 # But warn user when we do so
 warn-assign = \
@@ -811,6 +836,10 @@ define rule_vmlinux__
 		/bin/false;                                                  \
 	fi;
 	$(verify_kallsyms)
+
+	$(if $(CONFIG_CRYPTO_FIPS),						
+	@$(kecho) '  FIPS : Generating hmac of crypto and updating vmlinux... ';	
+	$(Q)$(CONFIG_SHELL) $(srctree)/scripts/fips_crypto_hmac.sh $(objtree)/vmlinux $(objtree)/System.map)
 endef
 
 
